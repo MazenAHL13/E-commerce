@@ -1,39 +1,164 @@
-# Especificación de Arquitectura: E-commerce Multitienda (Black Friday)
+# Especificación de Arquitectura: E-commerce Multitienda
 
-## 1. Visión General
-Desarrollar una plataforma integral de e-commerce que utilice una arquitectura híbrida (SQL + NoSQL) para gestionar una multitienda utilizando una arquitectura de Persistencia Políglota[cite: 1]. El sistema simulará alto tráfico para Black Friday. El enfoque debe ser 100% en el backend, código limpio, estructurado y el uso estricto de buenas prácticas de ingeniería de software.
+## 1. Visión general
 
-## 2. Stack Tecnológico
-* **Infraestructura:** Docker, docker-compose.
-* **Módulo Relacional:** PostgreSQL + pgAdmin.
-* **Módulo NoSQL:** MongoDB + Mongo Express.
-* **Backend:** Node.js con Express (Lo más simple y minimalista posible, su único fin es demostrar la integración y exponer endpoints). Utilizar el paquete `pg` para PostgreSQL y el driver nativo `mongodb` (o `mongoose`) para MongoDB.
+Desarrollar una plataforma de e-commerce multitienda utilizando una arquitectura híbrida basada en persistencia políglota.
 
-## 3. Especificaciones por Módulo
+El sistema debe integrar:
 
-### Fase 1: Infraestructura (Docker)
-* Levantar los servicios de PostgreSQL, pgAdmin, MongoDB y Mongo Express en un solo archivo `docker-compose.yml` utilizando redes compartidas, puertos estándar y variables de entorno para credenciales.
+- PostgreSQL para datos transaccionales, clientes y facturación
+- MongoDB para el catálogo flexible de productos
 
-### Fase 2: Módulo Relacional (PostgreSQL)
-Este módulo gestionará datos transaccionales, clientes y facturación[cite: 1].
-* **Esquema:** Crear tablas para `Clientes`, `Ordenes` y `Facturas` aplicando normalización (3NF)[cite: 1].
-* **Integración:** Utilizar GUID/UUID como clave primaria en la tabla de clientes para vincularlos posteriormente con MongoDB[cite: 1].
-* **Transacciones:** Implementar transacciones ACID explícitas para procesar los pagos[cite: 1].
-* **Seguridad:** 
-  * Implementar roles (RBAC)[cite: 1].
-  * Asegurar protección contra SQL Injection[cite: 1].
-  * Implementar o indicar claramente mediante comentarios el cifrado para datos de tarjetas[cite: 1].
+El enfoque principal del proyecto debe estar en el backend, en la integración entre ambas bases de datos y en demostrar el uso correcto de SQL + NoSQL dentro del mismo sistema.
 
-### Fase 3: Módulo NoSQL (MongoDB)
-Este módulo gestionará el catálogo de productos (ropa, electrónica, muebles, adornos, utensilios de cocina)[cite: 1].
-* **Esquema Dinámico:** Implementar un diseño polimórfico en formato BSON donde cada categoría tenga atributos específicos (ej. voltajes para electrónica, tallas para ropa) en la misma colección o bajo una jerarquía clara[cite: 1].
-* **Manejo de Arreglos:** Almacenar y estructurar atributos como arreglos dentro de los productos (ej. etiquetas, variantes, marcas, industria) para facilitar el filtrado[cite: 1].
-* **Consultas Requeridas:** Preparar índices o estructuras que permitan reportes de búsqueda comparativa usando operadores lógicos y de comparación (`$gt`, `$lt`, `$and`, `$or`)[cite: 1].
+---
 
-### Fase 4: Integración (Capa de Servicio / API)
-Implementar una capa de servicio (API/Middleware) que una los registros de clientes en PostgreSQL con sus preferencias, carritos y catálogos en MongoDB mediante el identificador único (GUID/UUID)[cite: 1].
-* **Endpoints Requeridos:**
-  1. `POST /clientes`: Inserta un cliente en PostgreSQL y retorna su UUID generado.
-  2. `POST /ordenes`: Crea una orden transaccional en PostgreSQL vinculada al UUID del cliente, demostrando manejo transaccional (ACID).
-  3. `GET /productos/buscar`: Consulta el catálogo en MongoDB utilizando operadores de comparación y lógicos para filtrar productos complejos (ej. buscar dentro de los arreglos de variantes o por atributos específicos).
-* **Restricciones de Código:** El backend debe incluir manejo adecuado de errores, asincronía correcta (async/await) y estar debidamente documentado.
+## 2. Stack tecnológico
+
+- Docker
+- Docker Compose
+- PostgreSQL
+- pgAdmin
+- MongoDB
+- Mongo Express
+- Node.js
+- Express
+- `pg` para PostgreSQL
+- `mongodb` o `mongoose` para MongoDB
+
+---
+
+## 3. Infraestructura
+
+En esta fase se debe levantar la infraestructura base usando un único archivo `docker-compose.yml`.
+
+Servicios requeridos:
+
+- `postgres`
+- `pgadmin`
+- `mongodb`
+- `mongo-express`
+
+Requisitos:
+
+- red compartida entre servicios
+- volúmenes para persistencia de datos
+- variables de entorno para credenciales
+
+---
+
+## 4. Módulo relacional
+
+El módulo relacional gestionará los datos transaccionales, clientes y facturación.
+
+Requisitos principales:
+
+- aplicar normalización en 3NF
+- usar UUID o GUID como identificador único para clientes
+- definir claves primarias y foráneas según corresponda
+- implementar transacciones ACID para el procesamiento de pagos
+- aplicar protección contra SQL Injection mediante consultas parametrizadas
+- implementar roles básicos de acceso (RBAC)
+- no almacenar datos reales de tarjeta sin protección
+
+Tablas mínimas esperadas:
+
+- `clientes`
+- `ordenes`
+- `facturas`
+
+---
+
+## 5. Módulo NoSQL
+
+El módulo NoSQL gestionará el catálogo de productos.
+
+Categorías esperadas:
+
+- ropa
+- electrónica
+- muebles
+- adornos
+- utensilios de cocina
+
+Requisitos principales:
+
+- usar documentos BSON con esquema flexible
+- permitir que cada categoría tenga atributos específicos
+- almacenar atributos consultables como arreglos cuando corresponda
+- soportar búsquedas con operadores:
+  - `$gt`
+  - `$lt`
+  - `$and`
+  - `$or`
+
+Ejemplos de atributos variables:
+
+- voltajes para electrónica
+- tallas para ropa
+- etiquetas, variantes, marcas o industria como arreglos
+
+---
+
+## 6. Integración entre bases de datos
+
+El sistema debe incluir una capa de servicio o API que conecte PostgreSQL con MongoDB usando un identificador único compartido.
+
+La integración debe demostrar:
+
+- registro de clientes en PostgreSQL
+- relación lógica entre clientes y datos usados en el sistema
+- uso de UUID/GUID para vincular información entre módulos
+
+---
+
+## 7. API mínima esperada
+
+La API debe ser simple y enfocada únicamente en demostrar la integración.
+
+Endpoints mínimos:
+
+1. `POST /clientes`
+Inserta un cliente en PostgreSQL y retorna su UUID generado.
+
+2. `POST /ordenes`
+Crea una orden transaccional en PostgreSQL vinculada al UUID del cliente y demuestra manejo ACID.
+
+3. `GET /productos/buscar`
+Consulta el catálogo en MongoDB usando operadores lógicos y de comparación.
+
+Requisitos de implementación:
+
+- uso de `async/await`
+- manejo adecuado de errores
+- respuestas JSON
+- documentación básica de uso
+
+---
+
+## 8. Entregables
+
+El proyecto debe incluir al menos:
+
+- script de creación de bases de datos
+- documentación de arquitectura
+- diagrama de flujo de datos
+- API que demuestre la integración y sincronización de datos
+
+---
+
+## 9. Alcance controlado
+
+Para mantenerse fiel al documento de la docente, este proyecto no debe complicarse con funcionalidades fuera del objetivo principal.
+
+Por ahora no es necesario agregar:
+
+- frontend complejo
+- autenticación o login
+- pasarela de pago real
+- cifrado externo con proveedores reales
+- microservicios
+- despliegue en nube
+- panel administrativo avanzado
+
+Si después queda tiempo, se puede añadir un frontend simple solo como apoyo visual, sin sacar el foco del backend.
