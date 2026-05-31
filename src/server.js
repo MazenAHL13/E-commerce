@@ -1,9 +1,11 @@
 import app from "./app.js";
 import { env } from "./config/env.js";
+import { connectMongo } from "./db/mongo.js";
 import { pgPool } from "./db/postgres.js";
 
 async function start() {
   await pgPool.query("SELECT 1");
+  await connectMongo();
 
   app.listen(env.port, () => {
     console.log(`API running on http://localhost:${env.port}`);

@@ -10,5 +10,11 @@ export const env = {
     database: process.env.POSTGRES_DB || "ecommerce",
     user: process.env.POSTGRES_USER || "postgres",
     password: process.env.POSTGRES_PASSWORD || "postgres"
+  },
+  mongo: {
+    uri:
+      process.env.MONGO_URI ||
+      "mongodb://root:example@localhost:27018/ecommerce?authSource=admin",
+    dbName: process.env.MONGO_DB || "ecommerce"
   }
 };
