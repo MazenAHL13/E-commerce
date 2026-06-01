@@ -1,5 +1,22 @@
 import { getMongoDb } from "../db/mongo.js";
 
+export async function crearProducto(producto) {
+  const db = getMongoDb();
+  const collection = db.collection("productos");
+
+  const documento = {
+    ...producto,
+    created_at: new Date()
+  };
+
+  const result = await collection.insertOne(documento);
+
+  return {
+    _id: result.insertedId,
+    ...documento
+  };
+}
+
 export async function buscarProductos(filters) {
   const db = getMongoDb();
   const collection = db.collection("productos");
