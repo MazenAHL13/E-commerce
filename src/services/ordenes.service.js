@@ -1,4 +1,5 @@
 import { pgPool } from "../db/postgres.js";
+import { env } from "../config/env.js";
 
 function generarNumeroFactura() {
   return `FAC-${Date.now()}`;
@@ -33,6 +34,9 @@ export async function crearOrden({
 
   try {
     await client.query("BEGIN");
+    await client.query("SELECT set_config('app.encryption_key', $1, true)", [
+      env.appEncryptionKey
+    ]);
 
     const clienteResult = await client.query(
       "SELECT id FROM clientes WHERE id = $1",
@@ -124,13 +128,21 @@ export async function crearOrden({
           nit_cliente,
           razon_social
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        VALUES (
+          $1,
+          $2,
+          $3,
+          app_encrypt_text($4),
+          $5,
+          app_encrypt_text($6),
+          app_encrypt_text($7)
+        )
         RETURNING
           id,
           orden_id,
           numero_factura,
-          nit_cliente,
-          razon_social,
+          app_decrypt_text(nit_cliente) AS nit_cliente,
+          app_decrypt_text(razon_social) AS razon_social,
           monto_total,
           metodo_pago,
           created_at
@@ -151,7 +163,7 @@ export async function crearOrden({
     const pagoResult = await client.query(
       `
         INSERT INTO pagos (factura_id, metodo_pago, estado_pago, monto, tarjeta_tokenizada)
-        VALUES ($1, $2, $3, $4, $5)
+        VALUES ($1, $2, $3, $4, app_encrypt_text($5))
         RETURNING id, factura_id, metodo_pago, estado_pago, monto, created_at
       `,
       [

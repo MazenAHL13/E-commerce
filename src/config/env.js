@@ -4,6 +4,7 @@ dotenv.config();
 
 export const env = {
   port: Number(process.env.PORT || 3000),
+  appEncryptionKey: process.env.APP_ENCRYPTION_KEY || "dev_demo_key_2026",
   postgres: {
     host: process.env.POSTGRES_HOST || "localhost",
     port: Number(process.env.POSTGRES_PORT || 5432),

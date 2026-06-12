@@ -35,6 +35,7 @@ CALL sp_crear_cliente('Ana Perez', 'ana@example.com', '77777777');
 - `vw_resumen_ordenes`: consolida clientes, ordenes, facturas y pagos en una sola consulta reutilizable.
 - `vw_clientes_sobre_promedio`: usa subconsultas para identificar clientes cuyo total comprado supera el promedio general.
 - `vw_ordenes_totales_validados`: usa subconsultas para comparar el total de una orden con la suma real de sus items.
+- `vw_facturas_seguras`: muestra datos sensibles desencriptados de manera controlada.
 
 Ejemplo de uso directo:
 
@@ -42,6 +43,19 @@ Ejemplo de uso directo:
 SELECT * FROM vw_resumen_ordenes;
 SELECT * FROM vw_clientes_sobre_promedio;
 SELECT * FROM vw_ordenes_totales_validados;
+SELECT * FROM vw_facturas_seguras;
+```
+
+## Encriptacion de datos sensibles
+
+Los campos `facturas.tarjeta_tokenizada`, `facturas.nit_cliente`, `facturas.razon_social` y `pagos.tarjeta_tokenizada`
+se almacenan cifrados usando `pgcrypto`.
+
+Para consultas desencriptadas en pgAdmin o `psql`, define primero la clave de sesion:
+
+```sql
+SET app.encryption_key = 'dev_demo_key_2026';
+SELECT * FROM vw_facturas_seguras;
 ```
 
 ## Cargar catalogo MongoDB

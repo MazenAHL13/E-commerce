@@ -1,3 +1,5 @@
+SET app.encryption_key = 'dev_demo_key_2026';
+
 INSERT INTO clientes (id, nombre, email, telefono)
 VALUES
   ('11111111-1111-1111-1111-111111111111', 'Ana Perez', 'ana@example.com', '77777777'),
@@ -47,10 +49,10 @@ INSERT INTO facturas (
   created_at
 )
 VALUES
-  ('ccccccc1-cccc-cccc-cccc-ccccccccccc1', 'aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaaaa1', 1225.00, 'tarjeta', 'tok_demo_carlos_001', 'FAC-DEMO-001', '900001', 'Carlos Mendoza', CURRENT_TIMESTAMP - INTERVAL '4 day'),
-  ('ccccccc2-cccc-cccc-cccc-ccccccccccc2', 'aaaaaaa2-aaaa-aaaa-aaaa-aaaaaaaaaaa2', 275.00, 'transferencia', 'tok_demo_lucia_001', 'FAC-DEMO-002', '900002', 'Lucia Fernandez', CURRENT_TIMESTAMP - INTERVAL '3 day'),
-  ('ccccccc3-cccc-cccc-cccc-ccccccccccc3', 'aaaaaaa3-aaaa-aaaa-aaaa-aaaaaaaaaaa3', 120.00, 'qr', 'tok_demo_diego_001', 'FAC-DEMO-003', '900003', 'Diego Rojas', CURRENT_TIMESTAMP - INTERVAL '2 day'),
-  ('ccccccc4-cccc-cccc-cccc-ccccccccccc4', 'aaaaaaa4-aaaa-aaaa-aaaa-aaaaaaaaaaa4', 113.00, 'tarjeta', 'tok_demo_valeria_001', 'FAC-DEMO-004', '900004', 'Valeria Quiroga', CURRENT_TIMESTAMP - INTERVAL '1 day')
+  ('ccccccc1-cccc-cccc-cccc-ccccccccccc1', 'aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaaaa1', 1225.00, 'tarjeta', app_encrypt_text('tok_demo_carlos_001'), 'FAC-DEMO-001', app_encrypt_text('900001'), app_encrypt_text('Carlos Mendoza'), CURRENT_TIMESTAMP - INTERVAL '4 day'),
+  ('ccccccc2-cccc-cccc-cccc-ccccccccccc2', 'aaaaaaa2-aaaa-aaaa-aaaa-aaaaaaaaaaa2', 275.00, 'transferencia', app_encrypt_text('tok_demo_lucia_001'), 'FAC-DEMO-002', app_encrypt_text('900002'), app_encrypt_text('Lucia Fernandez'), CURRENT_TIMESTAMP - INTERVAL '3 day'),
+  ('ccccccc3-cccc-cccc-cccc-ccccccccccc3', 'aaaaaaa3-aaaa-aaaa-aaaa-aaaaaaaaaaa3', 120.00, 'qr', app_encrypt_text('tok_demo_diego_001'), 'FAC-DEMO-003', app_encrypt_text('900003'), app_encrypt_text('Diego Rojas'), CURRENT_TIMESTAMP - INTERVAL '2 day'),
+  ('ccccccc4-cccc-cccc-cccc-ccccccccccc4', 'aaaaaaa4-aaaa-aaaa-aaaa-aaaaaaaaaaa4', 113.00, 'tarjeta', app_encrypt_text('tok_demo_valeria_001'), 'FAC-DEMO-004', app_encrypt_text('900004'), app_encrypt_text('Valeria Quiroga'), CURRENT_TIMESTAMP - INTERVAL '1 day')
 ON CONFLICT (orden_id) DO NOTHING;
 
 INSERT INTO pagos (
@@ -63,10 +65,10 @@ INSERT INTO pagos (
   created_at
 )
 VALUES
-  ('ddddddd1-dddd-dddd-dddd-ddddddddddd1', 'ccccccc1-cccc-cccc-cccc-ccccccccccc1', 'tarjeta', 'procesado', 1225.00, 'tok_demo_carlos_001', CURRENT_TIMESTAMP - INTERVAL '4 day'),
-  ('ddddddd2-dddd-dddd-dddd-ddddddddddd2', 'ccccccc2-cccc-cccc-cccc-ccccccccccc2', 'transferencia', 'procesado', 275.00, 'tok_demo_lucia_001', CURRENT_TIMESTAMP - INTERVAL '3 day'),
-  ('ddddddd3-dddd-dddd-dddd-ddddddddddd3', 'ccccccc3-cccc-cccc-cccc-ccccccccccc3', 'qr', 'procesado', 120.00, 'tok_demo_diego_001', CURRENT_TIMESTAMP - INTERVAL '2 day'),
-  ('ddddddd4-dddd-dddd-dddd-ddddddddddd4', 'ccccccc4-cccc-cccc-cccc-ccccccccccc4', 'tarjeta', 'procesado', 113.00, 'tok_demo_valeria_001', CURRENT_TIMESTAMP - INTERVAL '1 day')
+  ('ddddddd1-dddd-dddd-dddd-ddddddddddd1', 'ccccccc1-cccc-cccc-cccc-ccccccccccc1', 'tarjeta', 'procesado', 1225.00, app_encrypt_text('tok_demo_carlos_001'), CURRENT_TIMESTAMP - INTERVAL '4 day'),
+  ('ddddddd2-dddd-dddd-dddd-ddddddddddd2', 'ccccccc2-cccc-cccc-cccc-ccccccccccc2', 'transferencia', 'procesado', 275.00, app_encrypt_text('tok_demo_lucia_001'), CURRENT_TIMESTAMP - INTERVAL '3 day'),
+  ('ddddddd3-dddd-dddd-dddd-ddddddddddd3', 'ccccccc3-cccc-cccc-cccc-ccccccccccc3', 'qr', 'procesado', 120.00, app_encrypt_text('tok_demo_diego_001'), CURRENT_TIMESTAMP - INTERVAL '2 day'),
+  ('ddddddd4-dddd-dddd-dddd-ddddddddddd4', 'ccccccc4-cccc-cccc-cccc-ccccccccccc4', 'tarjeta', 'procesado', 113.00, app_encrypt_text('tok_demo_valeria_001'), CURRENT_TIMESTAMP - INTERVAL '1 day')
 ON CONFLICT (factura_id) DO NOTHING;
 
 INSERT INTO pagos (
@@ -83,7 +85,22 @@ SELECT
   COALESCE(NULLIF(f.metodo_pago, ''), 'pendiente_regularizacion'),
   'procesado',
   f.monto_total,
-  COALESCE(NULLIF(f.tarjeta_tokenizada, ''), 'tok_demo_regularizado')
+  app_encrypt_text(COALESCE(NULLIF(app_decrypt_text(f.tarjeta_tokenizada), ''), 'tok_demo_regularizado'))
 FROM facturas f
 LEFT JOIN pagos p ON p.factura_id = f.id
 WHERE p.id IS NULL;
+
+UPDATE facturas
+SET
+  tarjeta_tokenizada = app_encrypt_text(app_decrypt_text(tarjeta_tokenizada)),
+  nit_cliente = app_encrypt_text(app_decrypt_text(nit_cliente)),
+  razon_social = app_encrypt_text(app_decrypt_text(razon_social))
+WHERE
+  tarjeta_tokenizada IS NOT NULL
+  AND tarjeta_tokenizada NOT LIKE 'enc:%';
+
+UPDATE pagos
+SET tarjeta_tokenizada = app_encrypt_text(app_decrypt_text(tarjeta_tokenizada))
+WHERE
+  tarjeta_tokenizada IS NOT NULL
+  AND tarjeta_tokenizada NOT LIKE 'enc:%';

@@ -1,5 +1,10 @@
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
+DROP VIEW IF EXISTS vw_facturas_seguras;
+DROP VIEW IF EXISTS vw_ordenes_totales_validados;
+DROP VIEW IF EXISTS vw_clientes_sobre_promedio;
+DROP VIEW IF EXISTS vw_resumen_ordenes;
+
 CREATE TABLE IF NOT EXISTS clientes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   nombre VARCHAR(120) NOT NULL,
@@ -34,6 +39,15 @@ ADD COLUMN IF NOT EXISTS nit_cliente VARCHAR(30);
 ALTER TABLE facturas
 ADD COLUMN IF NOT EXISTS razon_social VARCHAR(150);
 
+ALTER TABLE facturas
+ALTER COLUMN tarjeta_tokenizada TYPE TEXT;
+
+ALTER TABLE facturas
+ALTER COLUMN nit_cliente TYPE TEXT;
+
+ALTER TABLE facturas
+ALTER COLUMN razon_social TYPE TEXT;
+
 CREATE UNIQUE INDEX IF NOT EXISTS idx_facturas_numero_factura
 ON facturas(numero_factura)
 WHERE numero_factura IS NOT NULL;
@@ -58,10 +72,57 @@ CREATE TABLE IF NOT EXISTS pagos (
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+ALTER TABLE pagos
+ALTER COLUMN tarjeta_tokenizada TYPE TEXT;
+
 CREATE INDEX IF NOT EXISTS idx_ordenes_cliente_id ON ordenes(cliente_id);
 CREATE INDEX IF NOT EXISTS idx_facturas_orden_id ON facturas(orden_id);
 CREATE INDEX IF NOT EXISTS idx_orden_items_orden_id ON orden_items(orden_id);
 CREATE INDEX IF NOT EXISTS idx_pagos_factura_id ON pagos(factura_id);
+
+CREATE OR REPLACE FUNCTION app_encrypt_text(p_plain_text TEXT)
+RETURNS TEXT
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  IF p_plain_text IS NULL OR btrim(p_plain_text) = '' THEN
+    RETURN NULL;
+  END IF;
+
+  IF current_setting('app.encryption_key', true) IS NULL THEN
+    RAISE EXCEPTION 'APP_ENCRYPTION_KEY_NO_DEFINIDA';
+  END IF;
+
+  RETURN 'enc:' || encode(
+    pgp_sym_encrypt(p_plain_text, current_setting('app.encryption_key')),
+    'base64'
+  );
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION app_decrypt_text(p_encrypted_text TEXT)
+RETURNS TEXT
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  IF p_encrypted_text IS NULL OR btrim(p_encrypted_text) = '' THEN
+    RETURN NULL;
+  END IF;
+
+  IF p_encrypted_text NOT LIKE 'enc:%' THEN
+    RETURN p_encrypted_text;
+  END IF;
+
+  IF current_setting('app.encryption_key', true) IS NULL THEN
+    RETURN '[ENCRYPTED]';
+  END IF;
+
+  RETURN pgp_sym_decrypt(
+    decode(substring(p_encrypted_text FROM 5), 'base64'),
+    current_setting('app.encryption_key')
+  );
+END;
+$$;
 
 CREATE OR REPLACE PROCEDURE sp_crear_cliente(
   IN p_nombre VARCHAR(120),
@@ -120,8 +181,8 @@ SELECT
   c.email AS cliente_email,
   f.id AS factura_id,
   f.numero_factura,
-  f.nit_cliente,
-  f.razon_social,
+  app_decrypt_text(f.nit_cliente)::VARCHAR(30) AS nit_cliente,
+  app_decrypt_text(f.razon_social)::VARCHAR(150) AS razon_social,
   p.id AS pago_id,
   p.metodo_pago,
   p.estado_pago,
@@ -173,3 +234,16 @@ WHERE o.total = (
   FROM orden_items oi
   WHERE oi.orden_id = o.id
 );
+
+CREATE OR REPLACE VIEW vw_facturas_seguras AS
+SELECT
+  f.id AS factura_id,
+  f.orden_id,
+  f.numero_factura,
+  app_decrypt_text(f.nit_cliente) AS nit_cliente,
+  app_decrypt_text(f.razon_social) AS razon_social,
+  app_decrypt_text(f.tarjeta_tokenizada) AS tarjeta_tokenizada,
+  f.monto_total,
+  f.metodo_pago,
+  f.created_at
+FROM facturas f;
