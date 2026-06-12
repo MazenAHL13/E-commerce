@@ -13,6 +13,17 @@ docker exec -i e-commerce-postgres-1 psql -U postgres -d ecommerce < scripts/pos
 docker exec -i e-commerce-postgres-1 psql -U postgres -d ecommerce < scripts/postgres_roles.sql
 ```
 
+## Procedimientos almacenados incluidos
+
+- `sp_crear_cliente`: valida y registra clientes desde PostgreSQL.
+- `sp_actualizar_estado_orden`: cambia el estado de una orden validando que exista.
+
+Ejemplo de uso directo:
+
+```sql
+CALL sp_crear_cliente('Ana Perez', 'ana@example.com', '77777777');
+```
+
 ## Cargar catalogo MongoDB
 
 ```bash

@@ -62,3 +62,49 @@ CREATE INDEX IF NOT EXISTS idx_ordenes_cliente_id ON ordenes(cliente_id);
 CREATE INDEX IF NOT EXISTS idx_facturas_orden_id ON facturas(orden_id);
 CREATE INDEX IF NOT EXISTS idx_orden_items_orden_id ON orden_items(orden_id);
 CREATE INDEX IF NOT EXISTS idx_pagos_factura_id ON pagos(factura_id);
+
+CREATE OR REPLACE PROCEDURE sp_crear_cliente(
+  IN p_nombre VARCHAR(120),
+  IN p_email VARCHAR(150),
+  IN p_telefono VARCHAR(30)
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  IF p_nombre IS NULL OR btrim(p_nombre) = '' THEN
+    RAISE EXCEPTION 'NOMBRE_REQUERIDO';
+  END IF;
+
+  IF p_email IS NULL OR btrim(p_email) = '' THEN
+    RAISE EXCEPTION 'EMAIL_REQUERIDO';
+  END IF;
+
+  INSERT INTO clientes (nombre, email, telefono)
+  VALUES (btrim(p_nombre), lower(btrim(p_email)), NULLIF(btrim(p_telefono), ''));
+END;
+$$;
+
+CREATE OR REPLACE PROCEDURE sp_actualizar_estado_orden(
+  IN p_orden_id UUID,
+  IN p_estado VARCHAR(30)
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  IF p_orden_id IS NULL THEN
+    RAISE EXCEPTION 'ORDEN_REQUERIDA';
+  END IF;
+
+  IF p_estado IS NULL OR btrim(p_estado) = '' THEN
+    RAISE EXCEPTION 'ESTADO_REQUERIDO';
+  END IF;
+
+  UPDATE ordenes
+  SET estado = lower(btrim(p_estado))
+  WHERE id = p_orden_id;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'ORDEN_NO_EXISTE';
+  END IF;
+END;
+$$;
