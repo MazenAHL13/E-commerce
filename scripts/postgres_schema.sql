@@ -108,3 +108,25 @@ BEGIN
   END IF;
 END;
 $$;
+
+CREATE OR REPLACE VIEW vw_resumen_ordenes AS
+SELECT
+  o.id AS orden_id,
+  o.created_at AS fecha_orden,
+  o.estado,
+  o.total,
+  c.id AS cliente_id,
+  c.nombre AS cliente_nombre,
+  c.email AS cliente_email,
+  f.id AS factura_id,
+  f.numero_factura,
+  f.nit_cliente,
+  f.razon_social,
+  p.id AS pago_id,
+  p.metodo_pago,
+  p.estado_pago,
+  p.monto AS monto_pagado
+FROM ordenes o
+JOIN clientes c ON c.id = o.cliente_id
+LEFT JOIN facturas f ON f.orden_id = o.id
+LEFT JOIN pagos p ON p.factura_id = f.id;

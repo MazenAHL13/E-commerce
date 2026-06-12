@@ -24,6 +24,16 @@ Ejemplo de uso directo:
 CALL sp_crear_cliente('Ana Perez', 'ana@example.com', '77777777');
 ```
 
+## Vista incluida
+
+- `vw_resumen_ordenes`: consolida clientes, ordenes, facturas y pagos en una sola consulta reutilizable.
+
+Ejemplo de uso directo:
+
+```sql
+SELECT * FROM vw_resumen_ordenes;
+```
+
 ## Cargar catalogo MongoDB
 
 ```bash
