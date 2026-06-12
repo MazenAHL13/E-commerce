@@ -130,3 +130,46 @@ FROM ordenes o
 JOIN clientes c ON c.id = o.cliente_id
 LEFT JOIN facturas f ON f.orden_id = o.id
 LEFT JOIN pagos p ON p.factura_id = f.id;
+
+CREATE OR REPLACE VIEW vw_clientes_sobre_promedio AS
+SELECT
+  c.id AS cliente_id,
+  c.nombre,
+  c.email,
+  (
+    SELECT COALESCE(SUM(o.total), 0)
+    FROM ordenes o
+    WHERE o.cliente_id = c.id
+  ) AS total_comprado
+FROM clientes c
+WHERE (
+  SELECT COALESCE(SUM(o.total), 0)
+  FROM ordenes o
+  WHERE o.cliente_id = c.id
+) > (
+  SELECT COALESCE(AVG(t.total_cliente), 0)
+  FROM (
+    SELECT COALESCE(SUM(o2.total), 0) AS total_cliente
+    FROM clientes c2
+    LEFT JOIN ordenes o2 ON o2.cliente_id = c2.id
+    GROUP BY c2.id
+  ) t
+);
+
+CREATE OR REPLACE VIEW vw_ordenes_totales_validados AS
+SELECT
+  o.id AS orden_id,
+  o.total AS total_registrado,
+  (
+    SELECT COALESCE(SUM(oi.subtotal), 0)
+    FROM orden_items oi
+    WHERE oi.orden_id = o.id
+  ) AS total_calculado_items,
+  o.estado,
+  o.created_at
+FROM ordenes o
+WHERE o.total = (
+  SELECT COALESCE(SUM(oi.subtotal), 0)
+  FROM orden_items oi
+  WHERE oi.orden_id = o.id
+);

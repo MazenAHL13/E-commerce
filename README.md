@@ -13,6 +13,12 @@ docker exec -i e-commerce-postgres-1 psql -U postgres -d ecommerce < scripts/pos
 docker exec -i e-commerce-postgres-1 psql -U postgres -d ecommerce < scripts/postgres_roles.sql
 ```
 
+## Cargar datos demo en PostgreSQL
+
+```bash
+docker exec -i e-commerce-postgres-1 psql -U postgres -d ecommerce < scripts/postgres_demo_seed.sql
+```
+
 ## Procedimientos almacenados incluidos
 
 - `sp_crear_cliente`: valida y registra clientes desde PostgreSQL.
@@ -27,11 +33,15 @@ CALL sp_crear_cliente('Ana Perez', 'ana@example.com', '77777777');
 ## Vista incluida
 
 - `vw_resumen_ordenes`: consolida clientes, ordenes, facturas y pagos en una sola consulta reutilizable.
+- `vw_clientes_sobre_promedio`: usa subconsultas para identificar clientes cuyo total comprado supera el promedio general.
+- `vw_ordenes_totales_validados`: usa subconsultas para comparar el total de una orden con la suma real de sus items.
 
 Ejemplo de uso directo:
 
 ```sql
 SELECT * FROM vw_resumen_ordenes;
+SELECT * FROM vw_clientes_sobre_promedio;
+SELECT * FROM vw_ordenes_totales_validados;
 ```
 
 ## Cargar catalogo MongoDB
