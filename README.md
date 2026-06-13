@@ -82,6 +82,32 @@ curl -X POST http://localhost:3000/clientes \
   -d '{"nombre":"Mazen Abu Hamdan","email":"mazen.abuhamdan@example.com","telefono":"77777777"}'
 ```
 
+### Listar clientes
+
+```bash
+curl "http://localhost:3000/clientes"
+```
+
+### Obtener cliente por id
+
+```bash
+curl "http://localhost:3000/clientes/UUID_DEL_CLIENTE"
+```
+
+### Actualizar cliente
+
+```bash
+curl -X PUT http://localhost:3000/clientes/UUID_DEL_CLIENTE \
+  -H "Content-Type: application/json" \
+  -d '{"telefono":"70000010"}'
+```
+
+### Eliminar cliente
+
+```bash
+curl -X DELETE http://localhost:3000/clientes/UUID_DEL_CLIENTE
+```
+
 ### Crear orden transaccional completa
 
 ```bash
@@ -109,10 +135,68 @@ curl -X POST http://localhost:3000/ordenes \
   }'
 ```
 
+### Listar ordenes
+
+```bash
+curl "http://localhost:3000/ordenes"
+```
+
+### Obtener orden por id
+
+```bash
+curl "http://localhost:3000/ordenes/UUID_DE_LA_ORDEN"
+```
+
+### Actualizar estado de orden
+
+```bash
+curl -X PUT http://localhost:3000/ordenes/UUID_DE_LA_ORDEN/estado \
+  -H "Content-Type: application/json" \
+  -d '{"estado":"enviado"}'
+```
+
+### Eliminar orden
+
+```bash
+curl -X DELETE http://localhost:3000/ordenes/UUID_DE_LA_ORDEN
+```
+
+### Crear producto
+
+```bash
+curl -X POST http://localhost:3000/productos \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nombre":"Mouse gamer",
+    "categoria":"electronica",
+    "precio":45,
+    "stock":30,
+    "marca":"HyperX",
+    "atributos":{"dpi":"16000"},
+    "variantes":["negro"],
+    "etiquetas":["gaming","oferta"],
+    "industria":["tecnologia"]
+  }'
+```
+
 ### Buscar productos
 
 ```bash
 curl "http://localhost:3000/productos/buscar?categoria=electronica&precioMin=500&precioMax=1500&etiqueta=black-friday"
+```
+
+### Actualizar producto
+
+```bash
+curl -X PUT http://localhost:3000/productos/ID_MONGO_DEL_PRODUCTO \
+  -H "Content-Type: application/json" \
+  -d '{"stock":25,"precio":40}'
+```
+
+### Eliminar producto
+
+```bash
+curl -X DELETE http://localhost:3000/productos/ID_MONGO_DEL_PRODUCTO
 ```
 
 ### Reporte resumen de ordenes

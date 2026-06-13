@@ -117,10 +117,15 @@ BEGIN
     RETURN '[ENCRYPTED]';
   END IF;
 
-  RETURN pgp_sym_decrypt(
-    decode(substring(p_encrypted_text FROM 5), 'base64'),
-    current_setting('app.encryption_key')
-  );
+  BEGIN
+    RETURN pgp_sym_decrypt(
+      decode(substring(p_encrypted_text FROM 5), 'base64'),
+      current_setting('app.encryption_key')
+    );
+  EXCEPTION
+    WHEN OTHERS THEN
+      RETURN '[ENCRYPTED]';
+  END;
 END;
 $$;
 

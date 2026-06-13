@@ -26,6 +26,12 @@ app.use((error, _req, res, _next) => {
     });
   }
 
+  if (error.code === "23503") {
+    return res.status(409).json({
+      error: "registro relacionado, operacion no permitida"
+    });
+  }
+
   return res.status(500).json({
     error: "internal_server_error"
   });
