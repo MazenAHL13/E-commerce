@@ -5,6 +5,7 @@ import CartDrawer from "./components/CartDrawer.jsx";
 import Home from "./pages/Home.jsx";
 import Catalog from "./pages/Catalog.jsx";
 import ProductDetail from "./pages/ProductDetail.jsx";
+import ApiDemo from "./pages/ApiDemo.jsx";
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/catalogo" element={<Catalog />} />
           <Route path="/producto/:id" element={<ProductDetail />} />
+          <Route path="/demo-api" element={<ApiDemo />} />
         </Routes>
       </main>
       <Footer />

@@ -38,6 +38,13 @@ export default function Header() {
           >
             Catálogo
           </NavLink>
+          <NavLink
+            to="/demo-api"
+            className={({ isActive }) => `nav__link ${isActive ? "nav__link--active" : ""}`}
+            onClick={() => setMenuOpen(false)}
+          >
+            Demo API
+          </NavLink>
         </nav>
 
         <div className="header__actions">

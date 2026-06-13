@@ -2,6 +2,27 @@ import { MOCK_PRODUCTS } from "../data/products.js";
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK !== "false";
 
+async function request(path, options = {}) {
+  const response = await fetch(path, {
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {})
+    },
+    ...options
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => ({}));
+    throw new Error(errorBody.error || "request_failed");
+  }
+
+  if (response.status === 204) {
+    return null;
+  }
+
+  return response.json();
+}
+
 function normalizeProduct(product, index) {
   return {
     id: product._id || product.id || `product-${index}`,
@@ -19,6 +40,10 @@ function normalizeProduct(product, index) {
     industria: product.industria || [],
     destacado: product.destacado || false
   };
+}
+
+export async function fetchHealth() {
+  return request("/health");
 }
 
 export async function fetchProductos(filters = {}) {
@@ -39,19 +64,66 @@ export async function fetchProductos(filters = {}) {
   const query = params.toString();
   const url = `/productos/buscar${query ? `?${query}` : ""}`;
 
-  const response = await fetch(url);
-
-  if (!response.ok) {
-    throw new Error("Error al cargar productos");
-  }
-
-  const data = await response.json();
-  return data.map(normalizeProduct);
+  const data = await request(url);
+  return filterMockProducts(data.map(normalizeProduct), filters);
 }
 
 export async function fetchProductoById(id) {
   const productos = await fetchProductos();
   return productos.find((p) => p.id === id) || null;
+}
+
+export function fetchClientes() {
+  return request("/clientes");
+}
+
+export function createCliente(payload) {
+  return request("/clientes", {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+}
+
+export function updateCliente(id, payload) {
+  return request(`/clientes/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload)
+  });
+}
+
+export function deleteCliente(id) {
+  return request(`/clientes/${id}`, {
+    method: "DELETE"
+  });
+}
+
+export function fetchOrdenes() {
+  return request("/ordenes");
+}
+
+export function updateOrdenEstado(id, estado) {
+  return request(`/ordenes/${id}/estado`, {
+    method: "PUT",
+    body: JSON.stringify({ estado })
+  });
+}
+
+export function deleteOrden(id) {
+  return request(`/ordenes/${id}`, {
+    method: "DELETE"
+  });
+}
+
+export function fetchResumenOrdenes() {
+  return request("/reportes/resumen-ordenes");
+}
+
+export function fetchClientesSobrePromedio() {
+  return request("/reportes/clientes-sobre-promedio");
+}
+
+export function fetchOrdenesValidadas() {
+  return request("/reportes/ordenes-validadas");
 }
 
 function filterMockProducts(products, { categoria, search, sort }) {
@@ -67,7 +139,7 @@ function filterMockProducts(products, { categoria, search, sort }) {
       (p) =>
         p.nombre.toLowerCase().includes(term) ||
         p.marca.toLowerCase().includes(term) ||
-        p.etiquetas.some((t) => t.includes(term))
+        p.etiquetas.some((t) => t.toLowerCase().includes(term))
     );
   }
 

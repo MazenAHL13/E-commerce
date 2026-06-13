@@ -6,9 +6,11 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
+      "/health": "http://localhost:3000",
       "/productos": "http://localhost:3000",
       "/clientes": "http://localhost:3000",
-      "/ordenes": "http://localhost:3000"
+      "/ordenes": "http://localhost:3000",
+      "/reportes": "http://localhost:3000"
     }
   }
 });
