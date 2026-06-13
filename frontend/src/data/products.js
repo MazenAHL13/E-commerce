@@ -1,11 +1,10 @@
 export const CATEGORIES = [
   { id: "todos", label: "Todos" },
-  { id: "gpu", label: "Tarjetas Gráficas" },
-  { id: "perifericos", label: "Periféricos" },
-  { id: "monitores", label: "Monitores" },
-  { id: "audio", label: "Audio" },
-  { id: "sillas", label: "Sillas Gaming" },
-  { id: "pc", label: "PC Gaming" }
+  { id: "electronica", label: "Electrónica" },
+  { id: "ropa", label: "Ropa" },
+  { id: "muebles", label: "Muebles" },
+  { id: "adornos", label: "Adornos" },
+  { id: "utensilios de cocina", label: "Utensilios de Cocina" }
 ];
 
 export const MOCK_PRODUCTS = [

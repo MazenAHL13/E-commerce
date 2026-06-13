@@ -9,7 +9,10 @@ export default function Home() {
 
   useEffect(() => {
     fetchProductos()
-      .then((products) => setFeatured(products.filter((p) => p.destacado).slice(0, 3)))
+      .then((products) => {
+        const destacados = products.filter((p) => p.destacado);
+        setFeatured((destacados.length > 0 ? destacados : products).slice(0, 3));
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -36,8 +39,8 @@ export default function Home() {
           <Link to="/catalogo" className="btn btn--primary btn--lg">
             Explorar catálogo
           </Link>
-          <Link to="/catalogo?categoria=gpu" className="btn btn--outline btn--lg">
-            Ver GPUs
+          <Link to="/catalogo?categoria=electronica" className="btn btn--outline btn--lg">
+            Ver electrónica
           </Link>
         </div>
 

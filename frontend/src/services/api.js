@@ -1,6 +1,6 @@
 import { MOCK_PRODUCTS } from "../data/products.js";
 
-const USE_MOCK = import.meta.env.VITE_USE_MOCK !== "false";
+const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true";
 
 async function request(path, options = {}) {
   const response = await fetch(path, {
@@ -24,6 +24,8 @@ async function request(path, options = {}) {
 }
 
 function normalizeProduct(product, index) {
+  const fallbackImage = getFallbackImage(product.categoria);
+
   return {
     id: product._id || product.id || `product-${index}`,
     nombre: product.nombre,
@@ -32,8 +34,10 @@ function normalizeProduct(product, index) {
     precioAnterior: product.precioAnterior,
     stock: product.stock,
     marca: product.marca,
-    imagen: product.imagen,
-    descripcion: product.descripcion,
+    imagen: product.imagen || fallbackImage,
+    descripcion:
+      product.descripcion ||
+      `Producto de categoría ${product.categoria || "general"} registrado en el catálogo MongoDB.`,
     atributos: product.atributos || {},
     variantes: product.variantes || [],
     etiquetas: product.etiquetas || [],
@@ -152,4 +156,21 @@ function filterMockProducts(products, { categoria, search, sort }) {
   }
 
   return result;
+}
+
+function getFallbackImage(categoria) {
+  switch (categoria) {
+    case "electronica":
+      return "https://images.unsplash.com/photo-1518770660439-4636190af475?w=900&h=700&fit=crop";
+    case "ropa":
+      return "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=900&h=700&fit=crop";
+    case "muebles":
+      return "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=900&h=700&fit=crop";
+    case "adornos":
+      return "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=900&h=700&fit=crop";
+    case "utensilios de cocina":
+      return "https://images.unsplash.com/photo-1547592180-85f173990554?w=900&h=700&fit=crop";
+    default:
+      return "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=900&h=700&fit=crop";
+  }
 }
