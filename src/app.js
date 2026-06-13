@@ -2,6 +2,7 @@ import express from "express";
 import clientesRouter from "./routes/clientes.routes.js";
 import ordenesRouter from "./routes/ordenes.routes.js";
 import productosRouter from "./routes/productos.routes.js";
+import reportesRouter from "./routes/reportes.routes.js";
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.get("/health", (_req, res) => {
 app.use("/", clientesRouter);
 app.use("/", ordenesRouter);
 app.use("/", productosRouter);
+app.use("/", reportesRouter);
 
 app.use((error, _req, res, _next) => {
   console.error(error);

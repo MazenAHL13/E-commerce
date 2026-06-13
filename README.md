@@ -114,3 +114,21 @@ curl -X POST http://localhost:3000/ordenes \
 ```bash
 curl "http://localhost:3000/productos/buscar?categoria=electronica&precioMin=500&precioMax=1500&etiqueta=black-friday"
 ```
+
+### Reporte resumen de ordenes
+
+```bash
+curl "http://localhost:3000/reportes/resumen-ordenes"
+```
+
+### Reporte clientes sobre promedio
+
+```bash
+curl "http://localhost:3000/reportes/clientes-sobre-promedio"
+```
+
+### Reporte ordenes validadas
+
+```bash
+curl "http://localhost:3000/reportes/ordenes-validadas"
+```
