@@ -106,21 +106,12 @@ export async function listarOrdenes() {
   const client = await pgPool.connect();
 
   try {
-    const idsResult = await client.query(
-      `
-        SELECT id
-        FROM ordenes
-        ORDER BY created_at DESC
-      `
-    );
-
-    const ordenes = [];
-
-    for (const row of idsResult.rows) {
-      ordenes.push(await obtenerOrdenDetalle(client, row.id));
-    }
-
-    return ordenes;
+    const result = await client.query(`
+      SELECT id, cliente_id, estado, total, created_at
+      FROM ordenes
+      ORDER BY created_at DESC
+    `);
+    return result.rows;
   } finally {
     client.release();
   }
