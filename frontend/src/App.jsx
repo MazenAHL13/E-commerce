@@ -1,30 +1,42 @@
-import { Routes, Route } from "react-router-dom";
-import Header from "./components/Header.jsx";
-import Footer from "./components/Footer.jsx";
-import CartDrawer from "./components/CartDrawer.jsx";
-import Home from "./pages/Home.jsx";
-import Catalog from "./pages/Catalog.jsx";
-import ProductDetail from "./pages/ProductDetail.jsx";
-import ApiDemo from "./pages/ApiDemo.jsx";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { AdminRoute, ClientRoute } from "./routes/ProtectedRoute.jsx";
+
+// Páginas públicas
+import Login from "./pages/Login.jsx";
+
+// Páginas Admin
+import AdminDashboard from "./pages/admin/Dashboard.jsx";
+import AdminClientes  from "./pages/admin/Clientes.jsx";
+import AdminProductos from "./pages/admin/Productos.jsx";
+import AdminOrdenes   from "./pages/admin/Ordenes.jsx";
+import AdminReportes  from "./pages/admin/Reportes.jsx";
+
+// Páginas Cliente
+import ClienteDashboard from "./pages/cliente/Dashboard.jsx";
+import ClienteCatalogo  from "./pages/cliente/Catalogo.jsx";
+import MisOrdenes       from "./pages/cliente/MisOrdenes.jsx";
 
 export default function App() {
   return (
-    <div className="app">
-      <div className="bg-grid" aria-hidden="true" />
-      <div className="bg-glow bg-glow--left" aria-hidden="true" />
-      <div className="bg-glow bg-glow--right" aria-hidden="true" />
+    <Routes>
+      {/* Raíz → login */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/login" element={<Login />} />
 
-      <Header />
-      <main className="main">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/catalogo" element={<Catalog />} />
-          <Route path="/producto/:id" element={<ProductDetail />} />
-          <Route path="/demo-api" element={<ApiDemo />} />
-        </Routes>
-      </main>
-      <Footer />
-      <CartDrawer />
-    </div>
+      {/* Rutas Admin */}
+      <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+      <Route path="/admin/clientes"  element={<AdminRoute><AdminClientes /></AdminRoute>} />
+      <Route path="/admin/productos" element={<AdminRoute><AdminProductos /></AdminRoute>} />
+      <Route path="/admin/ordenes"   element={<AdminRoute><AdminOrdenes /></AdminRoute>} />
+      <Route path="/admin/reportes"  element={<AdminRoute><AdminReportes /></AdminRoute>} />
+
+      {/* Rutas Cliente */}
+      <Route path="/cliente"             element={<ClientRoute><ClienteDashboard /></ClientRoute>} />
+      <Route path="/cliente/catalogo"    element={<ClientRoute><ClienteCatalogo /></ClientRoute>} />
+      <Route path="/cliente/mis-ordenes" element={<ClientRoute><MisOrdenes /></ClientRoute>} />
+
+      {/* Fallback */}
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
   );
 }
